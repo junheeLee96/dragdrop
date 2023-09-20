@@ -35,7 +35,7 @@ const values = [
 const App = () => {
   useEffect(() => {
     const Drag = () => {
-      console.log("drag!!");
+      // console.log("drag!!");
     };
 
     const $wrap = document.querySelectorAll(".wrap");
@@ -52,11 +52,21 @@ const App = () => {
     };
   }, []);
 
+  const onDrag = (e: React.MouseEvent<HTMLDivElement>) => {
+    // console.log(e);
+    console.log("onDrag");
+  };
+
+  const onDragStart = () => {
+    console.log("onDragStart");
+  };
+
   return (
     <div className="app">
       <div className="container">
         {values.map((v) => (
-          <div className="wrap">
+          // <div className="wrap" >
+          <div className="wrap" onDrag={onDrag}>
             <img src={v.src} style={{ width: "90px" }} alt="" />{" "}
             <div>{v.name}</div>
           </div>
