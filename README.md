@@ -82,3 +82,143 @@ onClick, onAbort, onAnimationStart, onChange....
 
 <br/>
 왜 동작하지 않는 걸까
+<br/>
+MDN을 살펴보자<br/>
+
+<img width="843" alt="스크린샷 2023-09-21 오후 10 11 07" src="https://github.com/junheeLee96/dragdrop/assets/89452058/6bb08db0-f3a9-4875-8ffa-2782807b6f3e">
+
+<br/>
+
+중요한 부분은 "draggable"
+<br/>
+
+바로 시도해보자.
+
+<br/>
+<img width="444" alt="스크린샷 2023-09-21 오후 10 16 19" src="https://github.com/junheeLee96/dragdrop/assets/89452058/df9a5abc-f134-4b81-afa5-293082d40c41">
+
+<br/>
+
+![제목 없는 디자인 (2)](https://github.com/junheeLee96/dragdrop/assets/89452058/797e30bd-0dfb-4fcb-925d-3c0aa1f8e5e2)
+
+<br/>
+오예!!
+
+<br/>
+
+자 이제 왼쪽박스에서 오른쪽 박스로 드래그를 하면 왼쪽박스로 엘리먼트가 이동하는 것을 구현해보자. <br/>
+
+```
+
+  const onDragEnd = (e: React.MouseEvent<HTMLDivElement>, idx: number) => {
+    console.log(e);
+    console.log("dragEnd!!");
+
+    const { clientX } = e;
+    const { clientY } = e;
+    //현재 위치를 구하고
+
+    if (
+      leftDivPosition.left <= clientX &&
+      clientX <= leftDivPosition.right &&
+      leftDivPosition.top <= clientY &&
+      clientY <= leftDivPosition.bottom
+    ) {
+      //마우스를 놓았을때 leftBox 영역에 잇으면,
+      const arr = [...rightValues];
+      //rightValues에서 idx번째를 빼내서
+      const removedItem = arr.splice(idx, 1);
+
+      setLeftValues((p) => {
+        return [...p, ...removedItem];
+      }); //빼낸 값을 leftValues에 넣고
+      setRightValues(arr);
+      //빼낸 나머지 값을 right에 넣는다.
+    } else if (
+      //오른쪽 박스 영역이라면
+      rightDivPosition.left <= clientX &&
+      clientX <= rightDivPosition.right &&
+      rightDivPosition.top <= clientY &&
+      clientY <= rightDivPosition.bottom
+    ) {
+      const arr = [...leftValues];
+      const removedItem = arr.splice(idx, 1);
+      setRightValues((p) => [...p, ...removedItem]);
+      setLeftValues(arr);
+    }
+  };
+
+
+```
+
+<br/>
+드래그가 끝나면, 끝난 시점의 마우스 위치값을 구하고,<br/>
+마우스의 위치가 어느 박스에 속해있는지 판단한 다음 값을 다른 곳으로 옮기면 끝난다.
+<br/>
+하지만 또 문제점이 발생했다.
+<br/>
+
+https://github.com/junheeLee96/dragdrop/assets/89452058/00b549d2-5bdd-44ed-8fca-3df778325754
+
+바로 한박자씩 느리게 흘러간다는 문제점이다.
+
+<br/>
+
+onDragEnd가 마우스를 떼고 얼마간의 시간이 지난 후 동작하는 것으로 보아 onDrag에 해당 로직을 넣으면 되지 않을까...?
+<br/>하는 꿈을 잠시 꿨습니다...
+
+https://github.com/junheeLee96/dragdrop/assets/89452058/c053352b-da86-4dbb-a19f-7054b2f5f836
+
+<br/>
+결과는 참담했다.
+onDrag에 해당 로직을 넣는건 취소...
+<br/>
+<br/>
+드래그가 끝나는 시점에 값을 넣고 빼는 동작을 실행시켜야하는 것에는 틀림이없다.
+<br/>
+그람 아땋게 마우스를 떼는 순간 값을 넣고 뺄 수가 있을까<br/>
+
+<!-- 가장 최상위 조건은 마우스를 떼는 순간 onDragEnd가 실행되는 것이다.
+<br/>
+onDragEnd가 실행되는 시점을 살펴보자.
+<br/>
+드래그를 하는 순간, 그림자(?)또는 복제본이 따라온다.
+<br/>
+마우스를 떼고, 그 복제본이 다시 원래 자리로 돌아간 이후에 onDragEnd가 동작하는 걸까?
+
+<br/><br/>
+
+ -->
+
+ <br/>
+ 이 방법 저 방법을 찾다가 MDN을 천천히 쭉 보게되었다.<br/>
+ 그러다 발견한 onDragOver!!<br/>
+
+https://github.com/junheeLee96/dragdrop/assets/89452058/e2d5582b-ab29-4b3f-a494-44618363f542
+
+<br/>
+MDN에서 내가 찾고자하는 예제랑 딱 들어맞았다.
+
+<br/>
+
+```
+ onDragOver={(e) => e.preventDefault()}
+```
+
+을 바로 사용해보았다.
+
+<br/>
+
+<br/>
+
+https://github.com/junheeLee96/dragdrop/assets/89452058/a1f2f9c4-0d66-4b8e-aa86-24d7e994e246
+
+<br/>
+
+너무 잘된다...
+
+구글링을 하지않고(MDN은...제외...) 처음 시도한 드래그 앤 드롭..
+<br/>
+드래그 앤 드롭을 직접 구현하는데 걸린 시간은 약 3시간 정도 걸린 것 같다.
+<br/>
+기능만 본다면 어려워보이지만, 실제로 구현해보니 그렇게 어려운 것은 없었다.
